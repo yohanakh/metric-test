@@ -47,13 +47,13 @@ public class Main {
         System.out.println("objectsPerThread=" + objectsPerThread);
 
 
-        run(gigaSpace, numberOfThreads, numberOfObjects, payload);
+        run(gigaSpace, numberOfThreads, objectsPerThread, payload);
 
         System.out.println("Clearing the space");
         gigaSpace.clear(null);
         System.out.println("Count after clear: " + gigaSpace.count(null));
 
-        run(gigaSpace, numberOfThreads, numberOfObjects, payload);
+        run(gigaSpace, numberOfThreads, objectsPerThread, payload);
 
         embeddedSpaceConfigurer.close();
 

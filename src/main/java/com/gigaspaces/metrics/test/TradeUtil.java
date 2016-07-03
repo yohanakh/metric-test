@@ -4,7 +4,6 @@ public class TradeUtil {
     static String toString(TradePojo trade) {
 
         String toString = "object name = " + trade.getClass().getSimpleName() +
-                "\n symbolLabel = " + trade.getSymbolLabel() +
                 "\n tradeId = " + trade.getTradeId() +
                 "\n tradeStatus = " + trade.getTradeStatus() +
                 "\n price = " + trade.getPrice() +
@@ -18,9 +17,8 @@ public class TradeUtil {
 
     public static TradePojo newInstanceByPrimaryKey(Integer primaryKey, int payLoad) {
         TradePojo trade = new TradePojo();
-        trade.setSymbolLabel(primaryKey.toString());
 
-        trade.setTradeId(1L);
+        trade.setTradeId(primaryKey);
         trade.setTradeStatus(TradePojo.TradeStatus.NEW);
         trade.setPrice(1000.0F);
         trade.setTimestamp(System.currentTimeMillis());

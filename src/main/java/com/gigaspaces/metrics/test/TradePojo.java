@@ -23,16 +23,11 @@ public class TradePojo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Object's space index field
-     */
-    private String symbolLabel;
-
-    /**
      * Object's secondary key field.
      * This field is a regular field concerning the space, in metric it is
      * used to filter by thread context.
      */
-    private Long tradeId;
+    private Integer tradeId;
 
     /**
      * Object's space index.
@@ -50,34 +45,19 @@ public class TradePojo implements Serializable {
 
     private Integer quantity;
 
-    /**
-     * Object's space uid implementation.
-     */
-    transient private String uid;
-
     public TradePojo() {
     }
 
-    @SpaceRouting
-    @SpaceIndex(type = SpaceIndexType.BASIC)
-    public String getSymbolLabel() {
-        return symbolLabel;
-    }
 
-    public void setSymbolLabel(String symbolLabel) {
-        this.symbolLabel = symbolLabel;
-    }
-
-    @SpaceIndex(type = SpaceIndexType.EXTENDED)
-    public Long getTradeId() {
+    @SpaceId(autoGenerate = false)
+    public Integer getTradeId() {
         return tradeId;
     }
 
-    public void setTradeId(Long tradeId) {
+    public void setTradeId(Integer tradeId) {
         this.tradeId = tradeId;
     }
 
-    @SpaceIndex(type = SpaceIndexType.BASIC)
     public TradeStatus getTradeStatus() {
         return tradeStatus;
     }
@@ -116,19 +96,6 @@ public class TradePojo implements Serializable {
 
     public void setPayload(byte[] payload) {
         this.payload = payload;
-    }
-
-    @SpaceId(autoGenerate = true)
-    public String getUid() {
-        return uid;
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public void clearUidInfo() {
-        uid = null;
     }
 
     @Override
