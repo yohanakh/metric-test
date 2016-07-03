@@ -32,10 +32,13 @@ public class Writer implements Runnable {
             throw new RuntimeException("Failed to call await on barrier", e);
         }
 
-//        System.out.println("Starting to write from [" + _from + "] to [" + (_from + _count - 1) + "]");
+        System.out.println("Starting to write from [" + _from + "] to [" + (_from + _count - 1) + "]");
         for (int i = 0; i < _count; i++) {
+//            if (i % 10000 == 0) {
+//                System.out.println("Count: " + _gigaSpace.count(null));
+//            }
             _gigaSpace.write(_pojos[i]);
         }
-//        System.out.println("Finished to write from [" + _from + "] to [" + (_from + _count - 1) + "]");
+        System.out.println("Finished to write from [" + _from + "] to [" + (_from + _count - 1) + "]");
     }
 }

@@ -1,6 +1,5 @@
 package com.gigaspaces.metrics.test;
 
-import junit.framework.Assert;
 import org.openspaces.core.GigaSpace;
 import org.openspaces.core.GigaSpaceConfigurer;
 import org.openspaces.core.space.EmbeddedSpaceConfigurer;
@@ -34,11 +33,17 @@ public class Main {
             throw new Exception("numberOfObjects [" + numberOfObjects + "] cannot be divided by numberOfThreads [" + numberOfThreads + "] without remainder");
         }
 
+        Integer numOfRepeats = Integer.valueOf(System.getProperty("numOfRepeats", "-1"));
+        if (numOfRepeats == -1) {
+            throw new Exception("System property [numOfRepeats] must be set");
+        }
+
         threadBarrier = new ThreadBarrier(numberOfThreads + 1);
 
         int objectsPerThread = numberOfObjects / numberOfThreads;
 
         EmbeddedSpaceConfigurer embeddedSpaceConfigurer = new EmbeddedSpaceConfigurer("mySpace");
+        embeddedSpaceConfigurer.lookupGroups("metrickobiyohana");
         GigaSpaceConfigurer gigaSpaceConfigurer = new GigaSpaceConfigurer(embeddedSpaceConfigurer);
         GigaSpace gigaSpace = gigaSpaceConfigurer.create();
 
@@ -46,24 +51,37 @@ public class Main {
         System.out.println("numberOfThreads=" + numberOfThreads);
         System.out.println("objectsPerThread=" + objectsPerThread);
 
+        Writer[] writers = new Writer[numberOfThreads];
+        for (int i = 0; i < numberOfThreads; i++) {
+            writers[i] = new Writer(gigaSpace, (i * objectsPerThread), objectsPerThread, payload);
+        }
 
-        run(gigaSpace, numberOfThreads, objectsPerThread, payload);
+        long lastRun=0;
 
-        System.out.println("Clearing the space");
-        gigaSpace.clear(null);
-        System.out.println("Count after clear: " + gigaSpace.count(null));
+        for (int i=0; i<numOfRepeats; i++) {
+            System.out.println("Starting repeat #"+i);
+            lastRun = run(gigaSpace, writers, numberOfThreads);
 
-        run(gigaSpace, numberOfThreads, objectsPerThread, payload);
+            System.out.println("Clearing the space");
+            gigaSpace.clear(null);
+            System.out.println("Count after clear: " + gigaSpace.count(null));
+
+            System.gc();
+        }
+
+        run(gigaSpace, writers, numberOfThreads);
 
         embeddedSpaceConfigurer.close();
 
+
+        System.out.println("Last run took " + lastRun + " ms");
         System.exit(0);
     }
 
-    private static void run(GigaSpace gigaSpace, int numberOfThreads, int objectsPerThread, int payload) throws BrokenBarrierException, InterruptedException {
+    private static long run(GigaSpace gigaSpace, Writer[] writers, int numberOfThreads) throws BrokenBarrierException, InterruptedException {
         Thread[] threads = new Thread[numberOfThreads];
-        for (int i = 0; i < numberOfThreads; i++) {
-            threads[i] = new Thread(new Writer(gigaSpace, (i * objectsPerThread), objectsPerThread, payload));
+        for (int i=0; i<numberOfThreads; i++) {
+            threads[i] = new Thread(writers[i]);
         }
 
 
@@ -79,9 +97,11 @@ public class Main {
         }
 
         long endTime = System.currentTimeMillis();
-        System.out.println("Took: " + (endTime - startTime) + " ms");
+        long totalTime = (endTime - startTime);
+        System.out.println("Took: " + totalTime + " ms");
 
         Integer totalWritten = gigaSpace.count(null);
         System.out.println("Total written: " + totalWritten);
+        return totalTime;
     }
 }
